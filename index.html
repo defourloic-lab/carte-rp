@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Carte RP</title>
+
+  <style>
+    body {
+      background: #111;
+      color: white;
+      font-family: Arial;
+      text-align: center;
+    }
+
+    #map {
+      position: relative;
+      display: inline-block;
+      border: 2px solid white;
+    }
+
+    #map img {
+      width: 800px;
+      display: block;
+    }
+
+    .flag {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: white;
+    }
+
+    .neutral { background: gray; }
+    .konoha { background: blue; }
+    .suna { background: orange; }
+
+    .a_confirmer {
+      background: red;
+      border: 2px dashed black;
+    }
+
+    .timer {
+      position: absolute;
+      top: -18px;
+      font-size: 10px;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+
+<body>
+
+<h2>Carte RP - Drapeaux</h2>
+
+<div id="map">
+  <img src="map.png" alt="Carte">
+</div>
+
+<script type="module" src="app.js"></script>
+
+</body>
+</html>
