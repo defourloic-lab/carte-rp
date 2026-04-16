@@ -30,9 +30,11 @@ map.addEventListener("click", async (e) => {
 });
 
 onSnapshot(flagsCollection, (snapshot) => {
+
   document.querySelectorAll(".flag").forEach(el => el.remove());
 
   snapshot.forEach(docSnap => {
+
     const data = docSnap.data();
 
     const flag = document.createElement("div");
@@ -58,4 +60,5 @@ onSnapshot(flagsCollection, (snapshot) => {
 
     map.appendChild(flag);
   });
+
 });
