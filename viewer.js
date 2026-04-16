@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
-import { getFirestore, collection } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
+import { getFirestore, collection, doc } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
 
 /* 🔥 REMPLACE ICI PAR TA CONFIG FIREBASE */
 const firebaseConfig = {
@@ -16,25 +16,7 @@ const flagsCollection = collection(db, "flags");
 
 let flagsData = [];
 
-/* 🟢 Ajouter un point */
-map.addEventListener("click", async (e) => {
-  const name = prompt("Nom du point ?");
-  if (!name) return;
 
-  const rect = map.getBoundingClientRect();
-
-  const x = (e.clientX - rect.left) / rect.width;
-  const y = (e.clientY - rect.top) / rect.height;
-
-  await addDoc(flagsCollection, {
-    x,
-    y,
-    name,
-    owner: "neutral",
-    lastUpdate: Date.now(),
-    captureEnd: null
-  });
-});
 
 /* 🔄 Firestore */
 onSnapshot(flagsCollection, (snapshot) => {
