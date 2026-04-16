@@ -111,7 +111,7 @@ function renderFlags() {
         capture.innerText = "Capturable dans : " + formatTime(remaining);
       }
     } else {
-      capture.innerText = "Capturable : OFF";
+      capture.innerText = "Capturable dans : --";
     }
 
     /* définir timer capture */
