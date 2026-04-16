@@ -14,11 +14,9 @@ const db = getFirestore(app);
 const map = document.getElementById("map");
 const flagsCollection = collection(db, "flags");
 
-const CONFIRMATION_DELAY = 5 * 60 * 1000;
-
 let flagsData = [];
 
-/* 🟢 Ajouter un drapeau avec nom */
+/* 🟢 Ajouter un point */
 map.addEventListener("click", async (e) => {
   const name = prompt("Nom du point ?");
   if (!name) return;
@@ -33,7 +31,8 @@ map.addEventListener("click", async (e) => {
     y,
     name,
     owner: "neutral",
-    lastUpdate: Date.now()
+    lastUpdate: Date.now(),
+    captureEnd: null
   });
 });
 
@@ -73,21 +72,13 @@ function renderFlags() {
 
   flagsData.forEach(data => {
 
-    let displayOwner = data.owner;
-
-    const timeSince = now - data.lastUpdate;
-
-    if (timeSince > CONFIRMATION_DELAY) {
-      displayOwner = "a_confirmer";
-    }
-
     const flag = document.createElement("div");
-    flag.className = "flag " + displayOwner;
+    flag.className = "flag " + data.owner;
 
     flag.style.left = (data.x * rect.width) + "px";
     flag.style.top = (data.y * rect.height) + "px";
 
-    /* 🟡 clic gauche = changer camp */
+    /* 🟡 changement de camp */
     flag.addEventListener("click", async (event) => {
       event.stopPropagation();
 
@@ -103,13 +94,12 @@ function renderFlags() {
       });
     });
 
-    /* 🔴 clic droit = supprimer */
+    /* 🔴 suppression */
     flag.addEventListener("contextmenu", async (event) => {
       event.preventDefault();
       event.stopPropagation();
 
-      const confirmDelete = confirm("Supprimer ce point ?");
-      if (!confirmDelete) return;
+      if (!confirm("Supprimer ce point ?")) return;
 
       await deleteDoc(doc(db, "flags", data.id));
     });
@@ -117,19 +107,17 @@ function renderFlags() {
     /* 🏷️ nom */
     const label = document.createElement("div");
     label.style.position = "absolute";
-    label.style.top = "-32px";
+    label.style.top = "-40px";
     label.style.fontSize = "12px";
-    label.style.whiteSpace = "nowrap";
     label.innerText = data.name || "";
 
-    /* ⏱️ timer */
+    /* ⏱️ timer normal */
     const timer = document.createElement("div");
     timer.className = "timer";
 
-    const seconds = Math.floor(timeSince / 1000);
+    const seconds = Math.floor((now - data.lastUpdate) / 1000);
     timer.innerText = formatTime(seconds);
 
-    /* reset timer */
     timer.addEventListener("click", async (event) => {
       event.stopPropagation();
 
@@ -138,8 +126,43 @@ function renderFlags() {
       });
     });
 
+    /* 🔥 CAPTURE TIMER */
+    const capture = document.createElement("div");
+    capture.style.fontSize = "10px";
+    capture.style.marginTop = "2px";
+
+    if (data.captureEnd) {
+      const remaining = Math.floor((data.captureEnd - now) / 1000);
+
+      if (remaining <= 0) {
+        capture.innerText = "CAPTURABLE";
+
+        /* 💥 clignotement */
+        flag.classList.add("blink");
+      } else {
+        capture.innerText = "Capturable dans: " + formatTime(remaining);
+      }
+    } else {
+      capture.innerText = "Capturable : OFF";
+    }
+
+    /* 🖱️ clic pour définir timer */
+    capture.addEventListener("click", async (event) => {
+      event.stopPropagation();
+
+      const minutes = prompt("Dans combien de minutes ?");
+      if (!minutes) return;
+
+      const ms = parseInt(minutes) * 60 * 1000;
+
+      await updateDoc(doc(db, "flags", data.id), {
+        captureEnd: Date.now() + ms
+      });
+    });
+
     flag.appendChild(label);
     flag.appendChild(timer);
+    flag.appendChild(capture);
     map.appendChild(flag);
   });
 }

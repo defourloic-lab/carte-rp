@@ -5,55 +5,97 @@
   <title>Carte RP</title>
 
   <style>
-    body {
-      background: #111;
-      color: white;
-      font-family: Arial;
-      text-align: center;
-    }
+body {
+  background: #111;
+  color: white;
+  font-family: Arial;
+  text-align: center;
+}
 
-    #map {
-      position: relative;
-      display: inline-block;
-      width: 90vw;
-      max-width: 1400px;
-      border: 2px solid white;
-    }
+/* 📦 MAP */
+#map {
+  position: relative;
+  display: inline-block;
+  width: 90vw;
+  max-width: 1400px;
+  border: 2px solid white;
+}
 
-    #map img {
-      width: 100%;
-      display: block;
-    }
+#map img {
+  width: 100%;
+  display: block;
+}
 
-    .flag {
-      position: absolute;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 10px;
-      color: white;
-    }
+/* 📍 DRAPEAU */
+.flag {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: auto;
+}
 
-    .neutral { background: gray; }
-    .konoha { background: blue; }
-    .suna { background: orange; }
+/* 🎨 couleurs */
+.neutral { background: gray; }
+.konoha { background: blue; }
+.suna { background: orange; }
 
-    .a_confirmer {
-      background: red;
-      border: 2px dashed black;
-    }
+/* 🏷️ NOM */
+.flag div:first-child {
+  position: absolute;
+  top: -42px;
+  font-size: 12px;
+  white-space: nowrap;
+  background: rgba(0,0,0,0.6);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
 
-    .timer {
-      position: absolute;
-      top: -18px;
-      font-size: 10px;
-      white-space: nowrap;
-    }
+/* ⏱️ TIMER */
+.timer {
+  position: absolute;
+  top: -20px;
+  font-size: 10px;
+  background: rgba(0,0,0,0.6);
+  padding: 2px 4px;
+  border-radius: 4px;
+  white-space: nowrap;
+  pointer-events: auto;
+}
+
+/* 🔥 CAPTURE TIMER */
+.flag div:last-child {
+  position: absolute;
+  top: 20px;
+  font-size: 10px;
+  background: rgba(0,0,0,0.6);
+  padding: 2px 4px;
+  border-radius: 4px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+/* ✨ HOVER */
+.flag:hover {
+  transform: translate(-50%, -50%) scale(1.2);
+}
+
+/* 🔥 CLIGNOTEMENT */
+@keyframes blink {
+  0% { opacity: 1; }
+  50% { opacity: 0.2; }
+  100% { opacity: 1; }
+}
+
+/* utilisé quand capturable */
+.flag.blink {
+  animation: blink 1s infinite;
+}
   </style>
 </head>
 
