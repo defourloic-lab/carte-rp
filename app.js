@@ -14,7 +14,7 @@ const db = getFirestore(app);
 const map = document.getElementById("map");
 const flagsCollection = collection(db, "flags");
 
-const CONFIRMATION_DELAY = 5 * 60 * 1000; // 5 min
+const CONFIRMATION_DELAY = 5 * 60 * 1000;
 
 let flagsData = [];
 
@@ -33,7 +33,7 @@ map.addEventListener("click", async (e) => {
   });
 });
 
-/* 🔄 Écoute Firestore */
+/* 🔄 Firestore temps réel */
 onSnapshot(flagsCollection, (snapshot) => {
   flagsData = [];
 
@@ -47,7 +47,20 @@ onSnapshot(flagsCollection, (snapshot) => {
   renderFlags();
 });
 
-/* 🔄 rendu + timer live */
+/* ⏱️ Format temps */
+function formatTime(seconds) {
+  if (seconds < 60) return seconds + "s";
+
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return minutes + "m";
+
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+
+  return hours + "h " + remainingMinutes + "m";
+}
+
+/* 🎨 Render */
 function renderFlags() {
   document.querySelectorAll(".flag").forEach(el => el.remove());
 
@@ -70,7 +83,7 @@ function renderFlags() {
     flag.style.left = (data.x * rect.width) + "px";
     flag.style.top = (data.y * rect.height) + "px";
 
-    /* 🟡 clic gauche → changer camp */
+    /* 🟡 clic gauche = changer camp */
     flag.addEventListener("click", async (event) => {
       event.stopPropagation();
 
@@ -86,24 +99,30 @@ function renderFlags() {
       });
     });
 
-    /* 🔴 clic droit → supprimer */
-    flag.addEventListener("contextmenu", async (event) => {
+    /* 🔴 clic droit = supprimer */
+    flag.addEventListener("contextmenu", (event) => {
       event.preventDefault();
+      event.stopPropagation();
 
-      const confirmDelete = confirm("Supprimer ce drapeau ?");
-      if (!confirmDelete) return;
+      console.log("DELETE CLICK", data.id);
 
-      await deleteDoc(doc(db, "flags", data.id));
+      deleteDoc(doc(db, "flags", data.id))
+        .then(() => {
+          console.log("SUPPRIMÉ");
+        })
+        .catch((error) => {
+          console.error("ERREUR DELETE :", error);
+        });
     });
 
-    /* ⏱️ compteur */
+    /* ⏱️ timer */
     const timer = document.createElement("div");
     timer.className = "timer";
 
     const seconds = Math.floor(timeSince / 1000);
-    timer.innerText = seconds + "s";
+    timer.innerText = formatTime(seconds);
 
-    /* 🔄 reset compteur */
+    /* 🔄 reset timer */
     timer.addEventListener("click", async (event) => {
       event.stopPropagation();
 
@@ -117,7 +136,7 @@ function renderFlags() {
   });
 }
 
-/* 🔥 timer live (update toutes les secondes) */
+/* 🔄 mise à jour live */
 setInterval(() => {
   renderFlags();
 }, 1000);
