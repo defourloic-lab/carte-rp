@@ -17,7 +17,19 @@ const flagsCollection = collection(db, "flags");
 let flagsData = [];
 
 
+/* 🔄 Firestore */
+onSnapshot(flagsCollection, (snapshot) => {
+  flagsData = [];
 
+  snapshot.forEach(docSnap => {
+    flagsData.push({
+      id: docSnap.id,
+      ...docSnap.data()
+    });
+  });
+
+  renderFlags();
+});
 
 /* ⏱️ Format temps */
 function formatTime(seconds) {
@@ -90,13 +102,7 @@ function renderFlags() {
     const seconds = Math.floor((now - data.lastUpdate) / 1000);
     timer.innerText = "Dernier check : " + formatTime(seconds);
 
-    timer.addEventListener("click", async (event) => {
-      event.stopPropagation();
 
-      await updateDoc(doc(db, "flags", data.id), {
-        lastUpdate: Date.now()
-      });
-    });
 
 
 
