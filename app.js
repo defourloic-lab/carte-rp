@@ -18,8 +18,11 @@ const CONFIRMATION_DELAY = 5 * 60 * 1000;
 
 let flagsData = [];
 
-/* 🟢 Ajouter un drapeau */
+/* 🟢 Ajouter un drapeau avec nom */
 map.addEventListener("click", async (e) => {
+  const name = prompt("Nom du point ?");
+  if (!name) return;
+
   const rect = map.getBoundingClientRect();
 
   const x = (e.clientX - rect.left) / rect.width;
@@ -28,12 +31,13 @@ map.addEventListener("click", async (e) => {
   await addDoc(flagsCollection, {
     x,
     y,
+    name,
     owner: "neutral",
     lastUpdate: Date.now()
   });
 });
 
-/* 🔄 Firestore temps réel */
+/* 🔄 Firestore */
 onSnapshot(flagsCollection, (snapshot) => {
   flagsData = [];
 
@@ -47,7 +51,7 @@ onSnapshot(flagsCollection, (snapshot) => {
   renderFlags();
 });
 
-/* ⏱️ Format temps */
+/* ⏱️ format temps */
 function formatTime(seconds) {
   if (seconds < 60) return seconds + "s";
 
@@ -60,7 +64,7 @@ function formatTime(seconds) {
   return hours + "h " + remainingMinutes + "m";
 }
 
-/* 🎨 Render */
+/* 🎨 render */
 function renderFlags() {
   document.querySelectorAll(".flag").forEach(el => el.remove());
 
@@ -100,20 +104,23 @@ function renderFlags() {
     });
 
     /* 🔴 clic droit = supprimer */
-    flag.addEventListener("contextmenu", (event) => {
+    flag.addEventListener("contextmenu", async (event) => {
       event.preventDefault();
       event.stopPropagation();
 
-      console.log("DELETE CLICK", data.id);
+      const confirmDelete = confirm("Supprimer ce point ?");
+      if (!confirmDelete) return;
 
-      deleteDoc(doc(db, "flags", data.id))
-        .then(() => {
-          console.log("SUPPRIMÉ");
-        })
-        .catch((error) => {
-          console.error("ERREUR DELETE :", error);
-        });
+      await deleteDoc(doc(db, "flags", data.id));
     });
+
+    /* 🏷️ nom */
+    const label = document.createElement("div");
+    label.style.position = "absolute";
+    label.style.top = "-32px";
+    label.style.fontSize = "12px";
+    label.style.whiteSpace = "nowrap";
+    label.innerText = data.name || "";
 
     /* ⏱️ timer */
     const timer = document.createElement("div");
@@ -122,7 +129,7 @@ function renderFlags() {
     const seconds = Math.floor(timeSince / 1000);
     timer.innerText = formatTime(seconds);
 
-    /* 🔄 reset timer */
+    /* reset timer */
     timer.addEventListener("click", async (event) => {
       event.stopPropagation();
 
@@ -131,12 +138,13 @@ function renderFlags() {
       });
     });
 
+    flag.appendChild(label);
     flag.appendChild(timer);
     map.appendChild(flag);
   });
 }
 
-/* 🔄 mise à jour live */
+/* 🔄 refresh live */
 setInterval(() => {
   renderFlags();
 }, 1000);
